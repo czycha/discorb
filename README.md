@@ -8,11 +8,12 @@ A flexible framework for creating a Discord bot in Typescript.
 yarn add discorb discord.js
 ```
 
-## What do I need?
+## What do I need to get started?
 
 - To create a [Discord application](https://discord.com/developers/applications)
 - To create a bot user attached to your application
 - To have the bot's secret token (suggested to add to the environment and loaded via [dotenv](https://npm.im/dotenv))
+- A vision for the future
 
 ## Simple example
 
@@ -241,3 +242,7 @@ bot.close() => bot
 ```typescript
 process.on('exit', () => bot.close())
 ```
+
+## License
+
+This project uses the following license: [Hippocratic v2.1](/LICENSE.md).

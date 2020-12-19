@@ -10,7 +10,7 @@
   "types": "dist/discorb.d.ts",
   "repository": "https://github.com/czycha/discorb",
   "author": "James Anthony Bruno <j.bruno.che@gmail.com>",
-  "license": "MIT",
+  "license": "Hippocratic-2.1",
   "scripts": {
     "build": "microbundle",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
