@@ -1,0 +1,49 @@
+{
+  "name": "discorb",
+  "version": "1.0.0",
+  "description": "Discord bot scaffolding",
+  "source": "src/discorb.ts",
+  "main": "dist/discorb.js",
+  "umd:main": "dist/discorb.umd.js",
+  "module": "dist/discorb.m.js",
+  "esmodule": "dist/discorb.modern.js",
+  "types": "dist/discorb.d.ts",
+  "repository": "https://github.com/czycha/discorb",
+  "author": "James Anthony Bruno <j.bruno.che@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "microbundle",
+    "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
+    "test": "jest",
+    "watch": "microbundle watch"
+  },
+  "peerDependencies": {
+    "discord.js": "^12.5.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
+    "discord.js": "^12.5.1",
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-jest": "^24.1.3",
+    "eslint-plugin-prettier": "^3.3.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-unicorn": "^24.0.0",
+    "husky": "^4.3.6",
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.3",
+    "microbundle": "^0.12.4",
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.0.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "./src/**/*.{js,ts,tsx}": "eslint --fix"
+  }
+}
