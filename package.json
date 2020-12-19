@@ -11,6 +11,7 @@
   "repository": "https://github.com/czycha/discorb",
   "author": "James Anthony Bruno <j.bruno.che@gmail.com>",
   "license": "Hippocratic-2.1",
+  "keywords": ["discord", "bot"],
   "scripts": {
     "build": "microbundle",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
