@@ -1,6 +1,6 @@
 {
   "name": "discorb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Discord bot scaffolding",
   "source": "src/discorb.ts",
   "main": "dist/discorb.js",
@@ -14,6 +14,7 @@
   "scripts": {
     "build": "microbundle",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
+    "prepublishOnly": "yarn build",
     "test": "jest",
     "watch": "microbundle watch"
   },
