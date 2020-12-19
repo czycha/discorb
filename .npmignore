@@ -1,2 +1,5 @@
 *.test.ts
 examples
+.eslintrc.js
+.prettierrc
+jest.config.js
