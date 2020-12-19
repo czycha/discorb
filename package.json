@@ -1,6 +1,6 @@
 {
   "name": "discorb",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Discord bot scaffolding",
   "source": "src/discorb.ts",
   "main": "dist/discorb.js",
@@ -11,7 +11,10 @@
   "repository": "https://github.com/czycha/discorb",
   "author": "James Anthony Bruno <j.bruno.che@gmail.com>",
   "license": "Hippocratic-2.1",
-  "keywords": ["discord", "bot"],
+  "keywords": [
+    "discord",
+    "bot"
+  ],
   "scripts": {
     "build": "microbundle",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
