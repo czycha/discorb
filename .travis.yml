@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - '14.12.0'
+os: osx
+cache: yarn
+jobs:
+  include:
+    - stage: test
+      name: unit tests
+      script:
+        - yarn test
+    - stage: test
+      name: lint
+      script:
+        - yarn lint
+deploy:
+  provider: npm
+  on:
+    tags: true
