@@ -76,7 +76,7 @@ interface ConstructorOptions {
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `prefix`              | The prefix that marks a command for this bot. For example, `prefix: "!"` would mean that the bot would consider any message that starts with `!` to be intended for it. |
 | `invalidCommandError` | What is sent if the command doesn't exist.                                                                                                                              |
-| `errorMessage`        | What is sent if an unexpect error is thrown.                                                                                                                            |
+| `errorMessage`        | What is sent if an unexpected error is thrown.                                                                                                                          |
 
 #### State generic type (`S`)
 
@@ -103,7 +103,7 @@ Commands can be top-level or nested. For example, a command path of `top` would 
 
 ##### Caveat
 
-Subcommands must be registered after the command that owns it. So `top sub` must be registered after `top sub` and `top sub sub` must be registered after `top sub sub`.
+Subcommands must be registered after the command that owns it. So `top sub` must be registered after `top` and `top sub sub` must be registered after `top sub`.
 
 #### Action
 
@@ -111,7 +111,7 @@ Subcommands must be registered after the command that owns it. So `top sub` must
 type Action<S> = (this: Bot<S>, request: Request<S>) => void | Promise<void>
 ```
 
-Called when a command is sent to the bot. Bound to the bot instance.
+Called when a command is sent to the bot. Function is bound to the bot instance.
 
 ##### `request: Request<S>`
 
@@ -191,8 +191,16 @@ type StateListener<S> = (
 #### Example
 
 ```typescript
+interface BotState {
+  store: string
+  voiceChannel: discord.VoiceChannel
+  voiceConnection: discord.VoiceConnection
+}
+const bot = new Bot<BotState>({ prefix: ';;' })
+
 bot
   .register('store', function (request) {
+    // You can choose to supply only a portion of the state to update
     this.setState({ store: request.rest })
     request.message.reply(`Stored \`${request.rest}\``)
   })
