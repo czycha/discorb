@@ -6,15 +6,25 @@ import type {
   MessageOptions
 } from 'discord.js'
 
-export type Help =
+export type HelpMessage =
   | APIMessageContentResolvable
   | (MessageOptions & { split?: false })
   | MessageAdditions
 
+export type Help<S> =
+  | HelpMessage
+  | ((this: Bot<S>) => HelpMessage | Promise<HelpMessage>)
+
 export interface Command<S> {
   action: Action<S>
   sub: Record<string, Command<S>>
-  help?: Help
+  help?: Help<S>
+}
+
+export interface RegisterCommand<S> {
+  command: string
+  action: Action<S>
+  help?: Help<S>
 }
 
 export interface CommandsThrough<S> {
@@ -100,10 +110,24 @@ export class Bot<S = never> {
     return []
   }
 
-  register(commandPath: string, action: Action<S>) {
+  register(options: RegisterCommand<S>): Bot<S>
+  register(commandPath: string, action: Action<S>): Bot<S>
+  register(commandPath: string, action: Action<S>, help: Help<S>): Bot<S>
+  register(
+    ...arguments_:
+      | [RegisterCommand<S>]
+      | [string, Action<S>]
+      | [string, Action<S>, Help<S>]
+  ): Bot<S> {
+    let commandPath: string, action: Action<S>, help: Help<S>
+    if (typeof arguments_[0] === 'string') {
+      ;[commandPath, action, help] = arguments_
+    } else {
+      ;({ action, help, command: commandPath } = arguments_[0])
+    }
     const commands: string[] = commandPath.split(' ')
     const cmd = this.weakDive(commands)
-    const newCmd: Command<S> = { action, sub: {} }
+    const newCmd: Command<S> = { action, sub: {}, help }
     if (cmd.command == undefined && commands.length === 1) {
       this.commands[commands[commands.length - 1]] = newCmd
     } else if (
@@ -117,7 +141,7 @@ export class Bot<S = never> {
     return this
   }
 
-  help(commandPath: string, help: Help) {
+  help(commandPath: string, help: Help<S>) {
     const commands: string[] = commandPath.split(' ')
     const cmd = this.strictDive(commands)
     cmd.help = help
@@ -171,27 +195,40 @@ export class Bot<S = never> {
     }
   }
 
-  onHelp(request: Request<S>) {
-    return request.command == undefined
-      ? request.message.reply({
-          embed: {
-            title: 'Help',
-            fields: [
-              {
-                name: 'Commands',
-                value: [...Object.keys(this.commands), 'help']
-                  .sort()
-                  .map((cmd) => `- \`${cmd}\``)
-                  .join('\n')
-              },
-              {
-                name: 'Help with commands',
-                value: `You can get help with commands and sub-commands by running \`${this.prefix}command --help\``
-              }
-            ]
-          }
-        })
-      : request.message.reply(request.command.help)
+  async onHelp(request: Request<S>) {
+    if (request.command == undefined) {
+      request.message.reply({
+        embed: {
+          title: 'Help',
+          fields: [
+            {
+              name: 'Commands',
+              value: [...Object.keys(this.commands), 'help']
+                .sort()
+                .map((cmd) => `- \`${cmd}\``)
+                .join('\n')
+            },
+            {
+              name: 'Help with commands',
+              value: `You can get help with commands and sub-commands by running \`${this.prefix}command --help\``
+            }
+          ]
+        }
+      })
+    } else {
+      let helpMessage: HelpMessage
+      if (typeof request.command.help === 'function') {
+        try {
+          helpMessage = await request.command.help.call(this)
+        } catch (error) {
+          await this.onError(error, request)
+          return
+        }
+      } else {
+        helpMessage = request.command.help
+      }
+      request.message.reply(helpMessage)
+    }
   }
 
   strictDive(commands: string[]): Command<S> {

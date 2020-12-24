@@ -99,6 +99,13 @@ describe('commands', () => {
     it('returns Bot', () => {
       expect(bot.register('test', empty)).toBe(bot)
       expect(bot.help('test', 'Help!')).toBe(bot)
+      expect(
+        bot.register({
+          command: 'test2',
+          help: 'Help!',
+          action: empty
+        })
+      ).toBe(bot)
     })
 
     it('can be defined at top level', () => {
@@ -117,6 +124,25 @@ describe('commands', () => {
           sub: {}
         },
         anotherTest: {
+          action: expect.any(Function),
+          sub: {}
+        }
+      })
+
+      bot.register({
+        command: 'test2',
+        action: empty
+      })
+      expect(bot.commands).toEqual({
+        test: {
+          action: expect.any(Function),
+          sub: {}
+        },
+        anotherTest: {
+          action: expect.any(Function),
+          sub: {}
+        },
+        test2: {
           action: expect.any(Function),
           sub: {}
         }
@@ -193,6 +219,55 @@ describe('commands', () => {
               help: 'Help!'
             }
           },
+          help: 'Help!'
+        }
+      })
+
+      bot.register('test2', empty, 'Help!')
+      expect(bot.commands).toEqual({
+        test: {
+          action: expect.any(Function),
+          sub: {
+            this: {
+              action: expect.any(Function),
+              sub: {},
+              help: 'Help!'
+            }
+          },
+          help: 'Help!'
+        },
+        test2: {
+          action: expect.any(Function),
+          sub: {},
+          help: 'Help!'
+        }
+      })
+
+      bot.register({
+        command: 'test3',
+        action: empty,
+        help: 'Help!'
+      })
+      expect(bot.commands).toEqual({
+        test: {
+          action: expect.any(Function),
+          sub: {
+            this: {
+              action: expect.any(Function),
+              sub: {},
+              help: 'Help!'
+            }
+          },
+          help: 'Help!'
+        },
+        test2: {
+          action: expect.any(Function),
+          sub: {},
+          help: 'Help!'
+        },
+        test3: {
+          action: expect.any(Function),
+          sub: {},
           help: 'Help!'
         }
       })
@@ -298,6 +373,9 @@ describe('receiving messages', () => {
       .register('about', function (request) {
         request.message.reply(this.prefix)
       })
+      .help('about', function () {
+        return `More about this bot that has a prefix of ${this.prefix}`
+      })
       .register('error', () => {
         throw new Error('Uh-oh')
       })
@@ -363,6 +441,12 @@ describe('receiving messages', () => {
     const message = mockMessage(';;echo --help')
     await bot.receive(message)
     expect(message.reply).toHaveBeenCalledWith('Echoes back what you say')
+
+    const message2 = mockMessage(';;about --help')
+    await bot.receive(message2)
+    expect(message2.reply).toHaveBeenCalledWith(
+      'More about this bot that has a prefix of ;;'
+    )
   })
 
   it('should bind actions to bot', async () => {
