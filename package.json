@@ -17,6 +17,7 @@
   ],
   "scripts": {
     "build": "microbundle",
+    "build:docs": "typedoc src",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
     "prepublishOnly": "yarn build",
     "test": "jest",
