@@ -1,0 +1,8 @@
+{
+  "mode": "file",
+  "out": "docs",
+  "exclude": "**/*.test.ts",
+  "readme": "./README.md",
+  "includeVersion": true,
+  "theme": "minimal"
+}

@@ -10,7 +10,24 @@ jobs:
       script:
         - yarn eslint '{src,example}/**/*.{js,ts,tsx}'
         - yarn test
+    - stage: Build
+      name: Build
+      script:
+        - yarn build
+    - stage: Docs
+      name: Build docs
+      script:
+        - yarn build:docs
+      if: tag IS present
 deploy:
-  provider: npm
-  on:
-    tags: true
+  - provider: npm
+    on:
+      tags: true
+  - provider: pages
+    skip_cleanup: true
+    keep_history: true
+    github_token: $GITHUB_TOKEN
+    local_dir: docs
+    on:
+      tags: true
+      condition: -d docs
