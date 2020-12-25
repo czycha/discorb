@@ -1,6 +1,6 @@
 import { Message } from 'discord.js'
 
-import { Bot, Request } from './discorb'
+import { Bot, Plugin, Request } from './discorb'
 
 const empty = jest.fn()
 
@@ -453,5 +453,63 @@ describe('receiving messages', () => {
     const message = mockMessage(';;about')
     await bot.receive(message)
     expect(message.reply).toHaveBeenCalledWith(bot.prefix)
+  })
+})
+
+describe('pluginability', () => {
+  let bot: Bot
+  beforeEach(() => {
+    bot = new Bot({ prefix: ';;' })
+  })
+
+  it('should allow for registering command in one sweep', () => {
+    const plugin: Plugin = {
+      command: 'echo',
+      action: async (request) => {
+        await request.message.reply(request.message.content)
+      },
+      help: 'Echoes what you say',
+      sub: {
+        caps: {
+          action: async (request) => {
+            await request.message.reply(request.message.content.toUpperCase())
+          },
+          sub: {},
+          help: 'Echoes what you say in ALL CAPS'
+        }
+      }
+    }
+    bot.register(plugin)
+
+    expect(bot.commands).toEqual({
+      echo: {
+        action: expect.any(Function),
+        help: 'Echoes what you say',
+        sub: {
+          caps: {
+            action: expect.any(Function),
+            sub: {},
+            help: 'Echoes what you say in ALL CAPS'
+          }
+        }
+      }
+    })
+  })
+
+  it('should handle state types well', () => {
+    const plugin: Plugin<{ store: string }> = {
+      command: 'store',
+      action: function (request) {
+        this.setState({ store: request.rest })
+      }
+    }
+
+    bot.register(plugin)
+    expect(bot.commands).toEqual({
+      store: {
+        action: expect.any(Function),
+        sub: {}
+      }
+    })
   })
 })
