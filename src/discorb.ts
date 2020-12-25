@@ -11,28 +11,31 @@ export type HelpMessage =
   | (MessageOptions & { split?: false })
   | MessageAdditions
 
-export type Help<S> =
+type DefaultState = Record<string | number | symbol, unknown>
+
+export type Help<S = DefaultState> =
   | HelpMessage
   | ((this: Bot<S>) => HelpMessage | Promise<HelpMessage>)
 
-export interface Command<S> {
+export interface Command<S = DefaultState> {
   action: Action<S>
   sub: Record<string, Command<S>>
   help?: Help<S>
 }
 
-export interface RegisterCommand<S> {
+export interface Plugin<S = DefaultState> {
   command: string
   action: Action<S>
+  sub?: Record<string, Command<S>>
   help?: Help<S>
 }
 
-export interface CommandsThrough<S> {
+export interface CommandsThrough<S = DefaultState> {
   through: string[]
   command?: Command<S>
 }
 
-export interface Request<S> {
+export interface Request<S = DefaultState> {
   message: Message
   components: string[]
   commands: string[]
@@ -41,7 +44,7 @@ export interface Request<S> {
   args: string[]
 }
 
-export type Action<S> = (
+export type Action<S = DefaultState> = (
   this: Bot<S>,
   request: Request<S>
 ) => void | Promise<void>
@@ -52,13 +55,13 @@ interface ConstructorOptions {
   errorMessage?: string
 }
 
-export type StateListener<S> = (
+export type StateListener<S = DefaultState> = (
   this: Bot<S>,
   previousState: S,
   nextState: S
 ) => void | Promise<void>
 
-export class Bot<S = never> {
+export class Bot<S = DefaultState> {
   prefix: string
   commands: Record<string, Command<S>> = {}
   state: S
@@ -110,24 +113,27 @@ export class Bot<S = never> {
     return []
   }
 
-  register(options: RegisterCommand<S>): Bot<S>
+  register(options: Plugin<S>): Bot<S>
   register(commandPath: string, action: Action<S>): Bot<S>
   register(commandPath: string, action: Action<S>, help: Help<S>): Bot<S>
   register(
     ...arguments_:
-      | [RegisterCommand<S>]
+      | [Plugin<S>]
       | [string, Action<S>]
       | [string, Action<S>, Help<S>]
   ): Bot<S> {
-    let commandPath: string, action: Action<S>, help: Help<S>
+    let commandPath: string,
+      action: Action<S>,
+      help: Help<S>,
+      sub: Record<string, Command<S>>
     if (typeof arguments_[0] === 'string') {
       ;[commandPath, action, help] = arguments_
     } else {
-      ;({ action, help, command: commandPath } = arguments_[0])
+      ;({ action, help, command: commandPath, sub } = arguments_[0])
     }
     const commands: string[] = commandPath.split(' ')
     const cmd = this.weakDive(commands)
-    const newCmd: Command<S> = { action, sub: {}, help }
+    const newCmd: Command<S> = { action, sub: sub ?? {}, help }
     if (cmd.command == undefined && commands.length === 1) {
       this.commands[commands[commands.length - 1]] = newCmd
     } else if (
