@@ -14,11 +14,13 @@ export type HelpMessage =
   | (MessageOptions & { split?: false })
   | MessageAdditions
 
+type DefaultState = Record<string | number | symbol, unknown>
+
 /**
  * Message or message generator to be displayed when `<prefix><command> --help` or `<prefix>help` is called
  * @typeParam S Bot state type
  */
-export type Help<S> =
+export type Help<S = DefaultState> =
   | HelpMessage
   | ((this: Bot<S>) => HelpMessage | Promise<HelpMessage>)
 
@@ -26,7 +28,7 @@ export type Help<S> =
  * Registered command
  * @typeParam S Bot state type
  */
-export interface Command<S> {
+export interface Command<S = DefaultState> {
   action: Action<S>
 
   /**
@@ -39,12 +41,13 @@ export interface Command<S> {
 /**
  * Interface for registering a command using just an object.
  */
-export interface RegisterCommand<S> {
+export interface Plugin<S = DefaultState> {
   /**
    * Command path. For example, `<command>` or `<command> <subcommand>`
    */
   command: string
   action: Action<S>
+  sub?: Record<string, Command<S>>
   help?: Help<S>
 }
 
@@ -52,7 +55,7 @@ export interface RegisterCommand<S> {
  * Returned when searching for a command.
  * @typeParam S Bot state type
  */
-export interface CommandsThrough<S> {
+export interface CommandsThrough<S = DefaultState> {
   /**
    * Commands and subcommand hierarchy to get to returned command. Inclusive of command.
    */
@@ -68,7 +71,7 @@ export interface CommandsThrough<S> {
  * Discorb's custom request interface. Includes different interpretations of the incoming message and the message itself.
  * @typeParam S Bot state type
  */
-export interface Request<S> {
+export interface Request<S = DefaultState> {
   /**
    * The message that triggered the command.
    * @see {@link https://discord.js.org/#/docs/main/stable/class/Message | Discord's documentaton}
@@ -106,7 +109,7 @@ export interface Request<S> {
  *
  * @typeParam S Bot state type
  */
-export type Action<S> =
+export type Action<S = DefaultState> =
   /**
    * @param this    Function is bound to the bot instance. **Not an actual param.**
    * @param request The request received that triggered the command.
@@ -131,7 +134,7 @@ export interface ConstructorOptions {
  * Listener for state changes.
  * @typeParam S Bot state type
  */
-export type StateListener<S> =
+export type StateListener<S = DefaultState> =
   /**
    * @param this          Function is bound to the bot instance. **Not an actual param.**
    * @param previousState The previous state of the bot before the update.
@@ -155,7 +158,7 @@ export type PartialState<S, K extends keyof S> = Pick<S, K> | S
  * const botWithoutState = new Bot({ prefix: ';;' })
  * ```
  */
-export class Bot<S = never> {
+export class Bot<S = DefaultState> {
   /**
    * The prefix that marks a command for this bot. For example, `prefix: "!"` would mean that the bot would consider any message that starts with `!` to be intended for it.
    */
@@ -261,7 +264,7 @@ export class Bot<S = never> {
    * @param options Command definition.
    * @return        The bot instance.
    */
-  register(options: RegisterCommand<S>): Bot<S>
+  register(options: Plugin<S>): Bot<S>
   /**
    * Register a command. **Note: subcommands can only be defined after their parent commands are registered.**
    * @param commandPath What needs to be called to trigger a command. Example: `echo` or `roll advantage`.
@@ -279,19 +282,22 @@ export class Bot<S = never> {
   register(commandPath: string, action: Action<S>, help: Help<S>): Bot<S>
   register(
     ...arguments_:
-      | [RegisterCommand<S>]
+      | [Plugin<S>]
       | [string, Action<S>]
       | [string, Action<S>, Help<S>]
   ): Bot<S> {
-    let commandPath: string, action: Action<S>, help: Help<S>
+    let commandPath: string,
+      action: Action<S>,
+      help: Help<S>,
+      sub: Record<string, Command<S>>
     if (typeof arguments_[0] === 'string') {
       ;[commandPath, action, help] = arguments_
     } else {
-      ;({ action, help, command: commandPath } = arguments_[0])
+      ;({ action, help, command: commandPath, sub } = arguments_[0])
     }
     const commands: string[] = commandPath.split(' ')
     const cmd = this.weakDive(commands)
-    const newCmd: Command<S> = { action, sub: {}, help }
+    const newCmd: Command<S> = { action, sub: sub ?? {}, help }
     if (cmd.command == undefined && commands.length === 1) {
       this.commands[commands[commands.length - 1]] = newCmd
     } else if (
