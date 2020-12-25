@@ -11,24 +11,29 @@ jobs:
         - yarn eslint '{src,example}/**/*.{js,ts,tsx}'
         - yarn test
     - stage: Build
-      name: Build
       script:
         - yarn build
+    - stage: Release
+      script: echo "Deploying to NPM..."
+      if: tag IS present
+      deploy:
+        - provider: npm
+          api_key: $NPM_API_KEY
+          email: $NPM_EMAIL
+          skip_cleanup: true
+          on:
+            tags: true
     - stage: Docs
       name: Build docs
       script:
         - yarn build:docs
       if: tag IS present
-deploy:
-  - provider: npm
-    skip_cleanup: true
-    on:
-      tags: true
-  - provider: pages
-    skip_cleanup: true
-    keep_history: true
-    github_token: $GITHUB_TOKEN
-    local_dir: docs
-    on:
-      tags: true
-      condition: -d docs
+      deploy:
+        - provider: pages
+          skip_cleanup: true
+          keep_history: true
+          github_token: $GITHUB_TOKEN
+          local_dir: docs
+          on:
+            tags: true
+            condition: -d docs
