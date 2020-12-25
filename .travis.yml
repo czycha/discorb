@@ -21,6 +21,7 @@ jobs:
       if: tag IS present
 deploy:
   - provider: npm
+    skip_cleanup: true
     on:
       tags: true
   - provider: pages
