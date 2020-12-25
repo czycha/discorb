@@ -17,6 +17,7 @@
   ],
   "scripts": {
     "build": "microbundle",
+    "build:docs": "typedoc src",
     "lint": "eslint '{src,example}/**/*.{js,ts,tsx}' --quiet --fix",
     "prepublishOnly": "yarn build",
     "test": "jest",
@@ -41,6 +42,7 @@
     "microbundle": "^0.12.4",
     "prettier": "^2.2.1",
     "ts-jest": "^26.4.4",
+    "typedoc": "^0.19.2",
     "typescript": "^4.0.5"
   },
   "husky": {
