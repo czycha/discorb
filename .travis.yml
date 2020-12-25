@@ -18,7 +18,7 @@ jobs:
       if: tag IS present
       deploy:
         - provider: npm
-          api_key: $NPM_API_KEY
+          api_key: $NPM_API_TOKEN
           email: $NPM_EMAIL
           skip_cleanup: true
           on:
