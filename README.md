@@ -58,6 +58,41 @@ process.on('exit', () => {
 
 _For more, take a look at [the examples directory](/examples)._
 
+## Writing plugins
+
+Discorb is made with plugins in mind! The typical pattern is below:
+
+```typescript
+import { Plugin } from 'discorb'
+
+export const MyAwesomePlugin = (commandName = 'heckyeah'): Plugin => ({
+  command: commandName,
+  action: async (request) => { ... },
+  help: function () {
+    return `Call ${this.prefix}${commandName} to get a heck yeah!`
+  },
+  sub: {
+    ohno: {
+      action: async (request) => { ... },
+      help: 'Oh no!'
+    }
+  }
+})
+```
+
+It can then be added like this:
+
+```typescript
+import { Bot } from 'discorb'
+import { MyAwesomePlugin } from 'my-awesome-plugin'
+
+const bot = new Bot({ prefix: ';;' })
+  // Use default command name
+  .register(MyAwesomePlugin())
+  // Use custom command name
+  .register(MyAwesomePlugin('heck'))
+```
+
 ## Documentation
 
 [View documentation here.](https://czycha.github.io/discorb)
